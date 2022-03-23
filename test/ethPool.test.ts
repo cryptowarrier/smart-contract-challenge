@@ -20,10 +20,19 @@ describe("ETHPool", function () {
   });
   it("users can deposit their ethers", async () => {
     let poolBalance = await provider.request({method: 'eth_getBalance', params: [pool.address]});
-    expect(poolBalance).to.eq(parseEther("0"));
+    expect(Number(poolBalance)).to.eq(0);
     // deposit
     await pool.userDeposit({value: parseEther("100")});
     poolBalance = await provider.request({method: 'eth_getBalance', params: [pool.address]});
-    console.log(formatEther(String(poolBalance)))
+    expect(poolBalance).to.eq(parseEther("100"));
+    await pool.connect(account1).userDeposit({value: parseEther("50")});
+    poolBalance = await provider.request({method: 'eth_getBalance', params: [pool.address]});
+    expect(poolBalance).to.eq(parseEther("150"));
   });
+  it("users can deposit and withdraw any time", async () => {
+    await pool.userDeposit({value: parseEther("100")});
+    await pool.withdraw(parseEther("50"));
+    const balance = await provider.request({method: 'eth_getBalance', params: [pool.address]});
+    expect(balance).to.eq(parseEther("50"));
+  })
 });

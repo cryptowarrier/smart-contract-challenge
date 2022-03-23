@@ -61,7 +61,7 @@ contract ETHPool is Ownable, ReentrancyGuard {
     emit Deposit(msg.sender, msg.value);
   }
 
-  function unstake(uint256 amount) public nonReentrant {
+  function withdraw(uint256 amount) public nonReentrant {
     require(deposits[msg.sender] > amount, "Not Enough User Balance!");
     uint256 reward = pendingReward(msg.sender);
     if (reward > 0 && block.timestamp >= lastUpdate[msg.sender] + unlockPeriod) {
