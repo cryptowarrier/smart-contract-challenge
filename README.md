@@ -53,3 +53,6 @@ Bonus:
 Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
 
 _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
+
+
+https://testnet.bscscan.com/address/0x458C535F14D754232D9029b92f63c77977a9A802#code
