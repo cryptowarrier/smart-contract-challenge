@@ -59,5 +59,13 @@ describe("ETHPool", function () {
     await expect(pool.depositReward({value: parseEther("100")})).to.revertedWith(
       'Not Team Account!'
     );
-  })
+  });
+  it("doesn't allow to harvest before unlock period", async () => {
+    await pool.registerTeamAccount(account2.getAddress(), true);
+    await pool.connect(account2).depositReward({value: parseEther("100")});
+    await pool.userDeposit({value: parseEther("100")});
+    await expect(pool.harvest()).to.revertedWith(
+      "You can't harvest yet!"
+    );
+  });
 });
