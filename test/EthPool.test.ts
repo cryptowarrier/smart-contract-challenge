@@ -47,4 +47,17 @@ describe("ETHPool", function () {
       "Ownable: caller is not the owner"
     );
   });
+  it("can depoist reward by team account", async () => {
+    await pool.registerTeamAccount(account2.getAddress(), true);
+    await pool.connect(account2).depositReward({value: parseEther("100")});
+    const totalReward = await pool.totalRewards();
+    expect(totalReward).to.eq(parseEther("100"));
+    const balance = await provider.request({method: 'eth_getBalance', params: [pool.address]});
+    expect(balance).to.eq(totalReward);
+  });
+  it("does't allow to deposit reward by not team account", async () => {
+    await expect(pool.depositReward({value: parseEther("100")})).to.revertedWith(
+      'Not Team Account!'
+    );
+  })
 });
