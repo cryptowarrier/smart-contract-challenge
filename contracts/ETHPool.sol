@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.4;
 
+import "hardhat/console.sol";
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -58,15 +60,16 @@ contract ETHPool is Ownable, ReentrancyGuard {
     if(reward > 0 && block.timestamp >= lastUpdate[msg.sender] + unlockPeriod) {
       payable(msg.sender).transfer(reward);
     }
-    deposits[msg.sender] = msg.value;
+    deposits[msg.sender] += msg.value;
     lastUpdate[msg.sender] = block.timestamp;
     totalDeposits += msg.value;
     emit Deposit(msg.sender, msg.value);
   }
 
   function withdraw(uint256 amount) public nonReentrant {
-    require(deposits[msg.sender] > amount, "Not Enough User Balance!");
+    require(deposits[msg.sender] >= amount, "Not Enough User Balance!");
     uint256 reward = pendingReward(msg.sender);
+    // console.log(reward);
     if (reward > 0 && block.timestamp >= lastUpdate[msg.sender] + unlockPeriod) {
       payable(msg.sender).transfer(reward);
     }
@@ -87,12 +90,8 @@ contract ETHPool is Ownable, ReentrancyGuard {
 
   function pendingReward(address account) public view returns (uint256) {
     uint256 reward;
-    if (totalRewards > 0) {
-      if(totalDeposits > 0) {
-        reward = deposits[account].div(totalDeposits) * totalRewards;
-      } else {
-        reward = 0;
-      }
+    if(totalDeposits > 0 && totalRewards > 0) {
+      reward = deposits[account].mul(totalRewards).div(totalDeposits);
     } else {
       reward = 0;
     }

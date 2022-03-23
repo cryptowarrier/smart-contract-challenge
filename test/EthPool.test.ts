@@ -68,4 +68,22 @@ describe("ETHPool", function () {
       "You can't harvest yet!"
     );
   });
+  it("withdraw includes rewards", async () => {
+    await pool.registerTeamAccount(account2.getAddress(), true);
+    await pool.connect(account2).depositReward({value: parseEther("200")});
+    await pool.userDeposit({value: parseEther("100")});
+    await pool.connect(account1).userDeposit({value: parseEther("300")});
+    // increase time
+    await network.provider.send("evm_increaseTime", [86400 * 7]); 
+    await network.provider.send("evm_mine");
+    // withdraw
+    const balance1 = await owner.getBalance();
+    await pool.withdraw(parseEther("100"));
+    const balance2 = await owner.getBalance();
+    console.log(formatEther(balance2.sub(balance1)));
+    const balance3 = await account1.getBalance();
+    await pool.connect(account1).withdraw(parseEther("300"));
+    const balance4 = await account1.getBalance();
+    console.log(formatEther(balance4.sub(balance3)));
+  });
 });
