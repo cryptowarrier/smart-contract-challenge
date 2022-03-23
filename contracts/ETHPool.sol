@@ -21,6 +21,7 @@ contract ETHPool is Ownable, ReentrancyGuard {
   mapping(address => uint256) public rewardDeposits;
   uint256 public minAmount = 1;
   uint256 public totalRewards;
+  uint256 public totalDeposits;
 
 
   constructor (uint256 _minAmount) {
@@ -51,18 +52,19 @@ contract ETHPool is Ownable, ReentrancyGuard {
   function userDeposit () external payable nonReentrant {
     require(msg.value >= minAmount, "Not Enough Value!");
     uint256 reward = pendingReward(msg.sender);
-    if(reward > 0) {
+    if(reward > 0 && block.timestamp >= lastUpdate[msg.sender] + unlockPeriod) {
       payable(msg.sender).transfer(reward);
     }
     deposits[msg.sender] = msg.value;
     lastUpdate[msg.sender] = block.timestamp;
+    totalDeposits += msg.value;
     emit Deposit(msg.sender, msg.value);
   }
 
   function unstake(uint256 amount) public nonReentrant {
     require(deposits[msg.sender] > amount, "Not Enough User Balance!");
     uint256 reward = pendingReward(msg.sender);
-    if (reward > 0) {
+    if (reward > 0 && block.timestamp >= lastUpdate[msg.sender] + unlockPeriod) {
       payable(msg.sender).transfer(reward);
     }
     deposits[msg.sender] -= amount;
@@ -81,7 +83,16 @@ contract ETHPool is Ownable, ReentrancyGuard {
   }
 
   function pendingReward(address account) public view returns (uint256) {
-    uint256 stakedTime = block.timestamp.sub(lastUpdate[account]);
-    return deposits[account].mul(aprPercent).mul(stakedTime).div(unlockPeriod).div(totalRewards).div(1000);
+    uint256 reward;
+    if (totalRewards > 0) {
+      if(totalDeposits > 0) {
+        reward = deposits[account].div(totalDeposits) * totalRewards;
+      } else {
+        reward = 0;
+      }
+    } else {
+      reward = 0;
+    }
+    return reward;
   }
 }
