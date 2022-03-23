@@ -36,7 +36,10 @@ contract ETHPool is Ownable, ReentrancyGuard {
     } else {
       teams.remove(_account);
     }
-    
+  }
+
+  function teamAtIndex(uint256 _index) public view returns (address) {
+    return teams.at(_index);
   }
 
   // team function

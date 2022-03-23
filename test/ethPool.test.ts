@@ -34,5 +34,17 @@ describe("ETHPool", function () {
     await pool.withdraw(parseEther("50"));
     const balance = await provider.request({method: 'eth_getBalance', params: [pool.address]});
     expect(balance).to.eq(parseEther("50"));
-  })
+  });
+  it("owner can add/remove team account", async () => {
+    await pool.registerTeamAccount(account2.getAddress(), true);
+    const teamAccount = await pool.teamAtIndex(0);
+    expect(teamAccount).to.eq(await account2.getAddress());
+    await pool.registerTeamAccount(account2.getAddress(), false);
+    await expect(pool.teamAtIndex(0)).to.reverted;
+  });
+  it("doesn't allow to add team account by not owner", async () => {
+    await expect(pool.connect(account1).registerTeamAccount(account2.getAddress(), true)).to.revertedWith(
+      "Ownable: caller is not the owner"
+    );
+  });
 });
