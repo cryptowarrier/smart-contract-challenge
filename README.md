@@ -52,7 +52,7 @@ Bonus:
 
 Create a script (or a Hardhat task) to query the total amount of ETH held in the contract.
 
-run 
+run               
 npx hardhat run scripts/getBalance.ts
 
 _You can use any library you prefer: Ethers.js, Web3.js, Web3.py, eth-brownie_
